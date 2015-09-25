@@ -423,6 +423,22 @@ std::pair<OpenRAVE::KinBody::JointType, bool> URDFJointTypeToRaveJointType(int t
             break;
         }
 
+        case urdf::Geometry::BOX: {
+            urdf::Box const &box
+                    = dynamic_cast<const urdf::Box &>(*visual->geometry);
+            geom_info->_vGeomData = 0.5 * OpenRAVE::Vector(box.dim.x, box.dim.y,
+                                                           box.dim.z);
+            geom_info->_type = OpenRAVE::GT_Box;
+            // If a material color is specified, use it.
+            boost::shared_ptr<urdf::Material> material = visual->material;
+            if (material) {
+                geom_info->_vDiffuseColor = URDFColorToRaveVector(material->color);
+                geom_info->_vAmbientColor = URDFColorToRaveVector(material->color);
+            }
+            link_info->_vgeometryinfos.push_back(geom_info);
+            break;
+        }
+
         default:
             RAVELOG_WARN("Link[%s]: Only trimeshes are supported for visual geometry.\n", link_ptr->name.c_str());
         }
